@@ -1,75 +1,99 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, {useEffect} from 'react';
+import {
+    ActivityIndicator,
+    SafeAreaView,
+    Text,
+    View,
+    StyleSheet,
+    Image,
+    Button,
+    FlatList,
+    ScrollView
+} from "react-native";
+import axios from "axios";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const Index = () => {
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
+    const [isLoading, setIsLoading] = React.useState(true);
 
+    const [movies, setMovies] = React.useState([]);
+
+    const fetchMovies = async () => {
+        try{
+            setIsLoading(!isLoading);
+            const url = 'https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1';
+            const options = {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NTk3ZTQ5MWVkNmU4MGYwZGUxMmUzNDllYjYwZWE2ZSIsIm5iZiI6MTUzMzE5MjY1NS4yMDYsInN1YiI6IjViNjJhOWNmMGUwYTI2N2VlNzAyYjdkYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Xv4oEQTKm9GbehUNW1O_xByTJ78x0-FFiO8_E2mts5o'
+                }
+            };
+            const { data } = await axios.get(url, options)
+
+            console.log("**********************************************", data.results);
+            setMovies(data.results);
+            setIsLoading(!isLoading);
+        }catch(err){
+            console.log(err)
+            setIsLoading(!isLoading);
+        }
+    }
+    useEffect(() => {
+        // fetchMovies();
+    }, [])
+
+    return (
+        <SafeAreaView style={{ flex:1, justifyContent :"center", alignItems : "center"}}>
+            {/*<Text style={{color : "white", fontSize : 20}}>{movies.length}</Text>*/}
+            <ScrollView style={{flex:1, width: "100%"}}>
+            {movies && movies.map((movie,index) => (
+                <View key={index}>
+                    <Text style={{color :"white"}}>
+                        {movie.title}
+                    </Text>
+                    <Image
+                        style={styles.tinyLogo}
+                        source={{
+                            uri: `https://image.tmdb.org/t/p/w500/${movie.poster_path}`,
+                        }}
+                    />
+                </View>
+            ))}
+            </ScrollView>
+            {/*<Button*/}
+            {/*    onPress={fetchMovies}*/}
+            {/*    title="영화 불러오기"*/}
+            {/*    color="#841584"*/}
+            {/*    accessibilityLabel="Learn more about this purple button"*/}
+            {/*/>*/}
+
+            {/*<View>*/}
+            {/*    <Text style={{color:"white"}}>Hello World</Text>*/}
+            {/*    <ActivityIndicator size="small" color="white" />*/}
+            {/*    <Image*/}
+            {/*        style={styles.tinyLogo}*/}
+            {/*        source={{*/}
+            {/*            uri: 'https://reactnative.dev/img/tiny_logo.png',*/}
+            {/*        }}*/}
+            {/*    />*/}
+
+            {/*</View>*/}
+        </SafeAreaView>
+    );
+};
+
+export default Index;
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+    container: {
+        flex: 1,
+    },
+    tinyLogo: {
+        width: 150,
+        height: 150,
+    },
+    logo: {
+        width: 66,
+        height: 58,
+    },
 });
